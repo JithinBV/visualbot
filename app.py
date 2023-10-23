@@ -9,7 +9,7 @@ from langchain.agents import create_csv_agent
 from langchain.chat_models import ChatOpenAI
 from langchain.agents.agent_types import AgentType
 os.environ
-OPENAI_API_KEY="f769445c82844edda56668cb92806c21"
+OPENAI_API_KEY="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"
 AzureOpenAI.api_key = OPENAI_API_KEY
 
 
