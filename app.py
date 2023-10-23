@@ -10,10 +10,9 @@ from langchain.llms import AzureOpenAI
 from langchain.chains import ConversationalRetrievalChain
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
-API_KEY = os.environ['OPENAI_API_KEY']
+API_KEY = "f769445c82844edda56668cb92806c21"
 #Loading the model
 def load_llm():
-    load_dotenv()
     llm = AzureOpenAI(
     api_token=API_KEY,
     api_base="https://aoiaipsi.openai.azure.com",
