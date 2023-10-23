@@ -12,7 +12,7 @@ DB_FAISS_PATH = 'vectorstore/db_faiss'
 #Loading the model
 def load_llm():
     llm = AzureOpenAI(
-    api_token="f769445c82844edda56668cb92806c21",
+    OPENAI_API_KEY="f769445c82844edda56668cb92806c21",
     api_base="https://aoiaipsi.openai.azure.com",
     api_version="2023-07-01-preview",
     deployment_name="gpt-35-turbo-0613"
