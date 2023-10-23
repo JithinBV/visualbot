@@ -1,120 +1,85 @@
-import streamlit as st
-import pandas as pd
-import matplotlib.pyplot as plt
-from dotenv import load_dotenv
-import os
-from langchain.agents import create_pandas_dataframe_agent
-from langchain.chat_models import ChatOpenAI
+import streamlit as st 
+from streamlit_chat import message
+import tempfile
+from langchain.document_loaders.csv_loader import CSVLoader
+from langchain.embeddings import HuggingFaceEmbeddings
+from langchain.vectorstores import FAISS
 from langchain.llms import AzureOpenAI
-from langchain.agents.agent_types import AgentType
-from html_templates import css, user_template, bot_template
+from langchain.chains import ConversationalRetrievalChain
 
-def main():
-    st.set_page_config(page_title="MTI Pandas Agent")
-    logo_url = "https://i.imgur.com/9DLn81j.png"
-    st.image(logo_url, width=400)
-    st.subheader("MTI Pandas Agent")
-    st.write("Upload a CSV or XLSX file and query answers from your data.")
-    
-    # Apply CSS
-    st.write(css, unsafe_allow_html=True)
+DB_FAISS_PATH = 'vectorstore/db_faiss'
 
-    st.session_state.setdefault('chat_history', [])
+#Loading the model
+def load_llm():
+    llm = AzureOpenAI(
+    api_token="f769445c82844edda56668cb92806c21",
+    api_base="https://aoiaipsi.openai.azure.com",
+    api_version="2023-07-01-preview",
+    deployment_name="gpt-35-turbo-0613"
+)
+
+    return llm
+
+st.title("Chat with CSV using Llama2 🦙🦜")
+st.markdown("<h3 style='text-align: center; color: white;'>Built by <a href='https://github.com/AIAnytime'>AI Anytime with ❤️ </a></h3>", unsafe_allow_html=True)
+
+uploaded_file = st.sidebar.file_uploader("Upload your Data", type="csv")
+
+if uploaded_file :
+   #use tempfile because CSVLoader only accepts a file_path
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+        tmp_file.write(uploaded_file.getvalue())
+        tmp_file_path = tmp_file.name
+
+    loader = CSVLoader(file_path=tmp_file_path, encoding="utf-8", csv_args={
+                'delimiter': ','})
+    data = loader.load()
+    #st.json(data)
+    embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
+                                       model_kwargs={'device': 'cpu'})
+
+    db = FAISS.from_documents(data, embeddings)
+    db.save_local(DB_FAISS_PATH)
+    llm = load_llm()
+    chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
+
+    def conversational_chat(query):
+        result = chain({"question": query, "chat_history": st.session_state['history']})
+        st.session_state['history'].append((query, result["answer"]))
+        return result["answer"]
     
-    # Temperature slider
-    with st.sidebar:
-        with st.expander("Settings",  expanded=True):
-            TEMP = st.slider(label="LLM Temperature", min_value=0.0, max_value=1.0, value=0.5)
-            ("Adjust the LLM Temperature: A higher value makes the output more random, while a lower value makes it more deterministic.")
-            ("NOTE: Anything above 0.7 may produce hallucinations")
-            st.divider()
-            st.markdown("You will need a OpenAI api key to upload and chat. You can obtain it from https://platform.openai.com/account/api-keys")
-            st.divider()
-            st.markdown("To set API key As Environment Variable on a MAC Open Terminal and type export OPENAI_API_KEY = 'your_api_key'")
-            st.markdown("**To set up Environment Variable on Windows**")
-            st.markdown("""
-                       1. Open the Start Menu and search for **Environment Variables**
-                       2. Under the "System variables" section, click the "New" button.
-                       3. In the "Variable name" field, enter `OPENAI_API_KEY`.
-                       4. In the "Variable value" field, enter your actual OpenAI API key.
-                       5. Click "OK" to close all of the windows.                       
-                       """)             
-    # Upload File
-    file = st.file_uploader("Upload CSV or XLSX file", type=["csv", "xlsx"])
-    
-          
-    data = None
-    
-       
-    if file:
-        file_type = file.type
-        try:
-            if file_type.endswith('spreadsheetml.sheet'):
-                data = pd.read_excel(file)
-            elif file_type.endswith('csv'):
-                data = pd.read_csv(file)
-            else:
-                st.error("Unsupported file type")
-                return
-            st.write("Data Preview:")
-            st.write(data.head())
-            st.write(data.columns.tolist())
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
-            return
-    
-    else:
-        st.warning("No file uploaded yet.")
-    
-    if 'data' in locals() and data is not None:
-        chart_type = st.selectbox("Choose a chart type", ["Line Graph", "Bar Chart", "Scatter Plot"])
-        x_column = st.selectbox("Choose the x-axis column", data.columns)
-        y_column = st.selectbox("Choose the y-axis column", data.columns)
-        query = st.text_input("Enter a query:")  # Moved inside this block
+    if 'history' not in st.session_state:
+        st.session_state['history'] = []
+
+    if 'generated' not in st.session_state:
+        st.session_state['generated'] = ["Hello ! Ask me anything about " + uploaded_file.name + " 🤗"]
+
+    if 'past' not in st.session_state:
+        st.session_state['past'] = ["Hey ! 👋"]
         
-        if st.button("Generate Chart"):
-            fig, ax = plt.subplots()
-            if chart_type == "Line Graph":
-                ax.plot(data[x_column], data[y_column])
-            elif chart_type == "Bar Chart":
-                ax.bar(data[x_column], data[y_column])
-            elif chart_type == "Scatter Plot":
-                ax.scatter(data[x_column], data[y_column])
-            ax.set_xlabel(x_column)
-            ax.set_ylabel(y_column)
-            for label in ax.get_xticklabels():
-                label.set_rotation(45)
-                label.set_horizontalalignment('right')
-            ax.tick_params(axis='x', labelsize=8)
-            ax.tick_params(axis='y', labelsize=8)
-            st.pyplot(fig)
-        
-        
-        llm = AzureOpenAI(api_token="f769445c82844edda56668cb92806c21",
-                          api_base="https://aoiaipsi.openai.azure.com",
-                          api_version="2023-07-01-preview",
-                          deployment_name="gpt-35-turbo-0613")
-        agent = create_pandas_dataframe_agent(llm, data, verbose=True)
-        
-    if st.button("Execute") and query:
-        with st.spinner('Generating response...'):
-            try:
-                prompt = f'''
-                    Consider the uploaded pandas data, respond intelligently to user input
-                    \\nCHAT HISTORY: {st.session_state.chat_history}
-                    \\nUSER INPUT: {query}
-                    \\nAI RESPONSE HERE:
-                    '''
-                answer = agent.run(prompt)
-                st.session_state.chat_history.append(f"USER: {query}")
-                st.session_state.chat_history.append(f"AI: {answer}")
-                for i, message in enumerate(reversed(st.session_state.chat_history)):
-                    if i % 2 == 0:
-                        st.markdown(bot_template.replace("{{MSG}}", message), unsafe_allow_html=True)
-                    else:
-                        st.markdown(user_template.replace("{{MSG}}", message), unsafe_allow_html=True)
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-if __name__ == "__main__":
-    load_dotenv()
-    main()
+    #container for the chat history
+    response_container = st.container()
+    #container for the user's text input
+    container = st.container()
+
+    with container:
+        with st.form(key='my_form', clear_on_submit=True):
+            
+            user_input = st.text_input("Query:", placeholder="Talk to your csv data here (:", key='input')
+            submit_button = st.form_submit_button(label='Send')
+            
+        if submit_button and user_input:
+            output = conversational_chat(user_input)
+            
+            st.session_state['past'].append(user_input)
+            st.session_state['generated'].append(output)
+
+    if st.session_state['generated']:
+        with response_container:
+            for i in range(len(st.session_state['generated'])):
+                message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
+                message(st.session_state["generated"][i], key=str(i), avatar_style="thumbs")
+
+
+
+    
