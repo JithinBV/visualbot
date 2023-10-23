@@ -8,11 +8,14 @@ from dotenv import load_dotenv
 from langchain.vectorstores import FAISS
 from langchain.llms import AzureOpenAI
 from langchain.chains import ConversationalRetrievalChain
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
-load dotenv()
+load_dotenv()
 #Loading the model
 def load_llm():
+  load_dotenv()
   llm = Replicate(
         streaming = True,
         model = "meta/llama-2-7b:527827021d8756c7ab79fde0abbfaac885c37a3ed5fe23c7465093f0878d55ef", 
