@@ -3,16 +3,18 @@ from streamlit_chat import message
 import tempfile
 from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings import HuggingFaceEmbeddings
+from dotenv import load_dotenv
 from langchain.vectorstores import FAISS
 from langchain.llms import AzureOpenAI
 from langchain.chains import ConversationalRetrievalChain
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
-
+API_KEY = os.environ['OPENAI_API_KEY']
 #Loading the model
 def load_llm():
+    load_dotenv()
     llm = AzureOpenAI(
-    OPENAI_API_KEY="f769445c82844edda56668cb92806c21",
+    api_token=API_KEY,
     api_base="https://aoiaipsi.openai.azure.com",
     api_version="2023-07-01-preview",
     deployment_name="gpt-35-turbo-0613"
