@@ -6,6 +6,7 @@ from langchain.document_loaders.csv_loader import CSVLoader
 from langchain.embeddings import HuggingFaceEmbeddings
 from dotenv import load_dotenv
 from langchain.vectorstores import FAISS
+from langchain.llms import Replicate
 from langchain.llms import AzureOpenAI
 from langchain.chains import ConversationalRetrievalChain
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
