@@ -1,20 +1,21 @@
 import streamlit as st
 import pandas as pd
 import json
-from langchain.llms import AzureOpenAI
+import openai
 import os
 import re
 import matplotlib.pyplot as plt
 from langchain.agents import create_csv_agent
-from langchain.chat_models import AzureChatOpenAI
+from langchain.chat_models import ChatOpenAI
 from langchain.agents.agent_types import AgentType
-os.environ["AZURE_OPEN_KEY"]="f769445c82844edda56668cb92806c21"
+from apikey import OPENAI_API_KEY
+openai.api_key = OPENAI_API_KEY
 
 
 def csv_agent_func(file_path, user_message):
     """Run the CSV agent with the given file path and user message."""
     agent = create_csv_agent(
-        AzureChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613"),
+        ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613", openai_api_key=OPENAI_API_KEY),
         file_path, 
         verbose=True,
         agent_type=AgentType.OPENAI_FUNCTIONS,
@@ -34,7 +35,6 @@ def csv_agent_func(file_path, user_message):
     except Exception as e:
         st.write(f"Error: {e}")
         return None
-    
 
 def display_content_from_json(json_response):
     """
