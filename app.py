@@ -1,89 +1,118 @@
-import os
-import streamlit as st 
-from streamlit_chat import message
-import tempfile
-from langchain.document_loaders.csv_loader import CSVLoader
-from langchain.embeddings import HuggingFaceEmbeddings
-from dotenv import load_dotenv
-from langchain.vectorstores import FAISS
-from langchain.llms import Replicate
+import streamlit as st
+import pandas as pd
+import json
 from langchain.llms import AzureOpenAI
-from langchain.chains import ConversationalRetrievalChain
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+import os
+import re
+import matplotlib.pyplot as plt
+from langchain.agents import create_csv_agent
+from langchain.chat_models import ChatOpenAI
+from langchain.agents.agent_types import AgentType
+os.environ
+OPENAI_API_KEY="f769445c82844edda56668cb92806c21"
+AzureOpenAI.api_key = OPENAI_API_KEY
 
 
-DB_FAISS_PATH = 'vectorstore/db_faiss'
-load_dotenv()
-#Loading the model
-def load_llm():
-  load_dotenv()
-  llm = Replicate(
-        streaming = True,
-        model = "meta/llama-2-7b:527827021d8756c7ab79fde0abbfaac885c37a3ed5fe23c7465093f0878d55ef", 
-        callbacks=[StreamingStdOutCallbackHandler()],
-        input = {"temperature": 0.01, "max_length" :4096,"top_p":1})
-  return llm
+def csv_agent_func(file_path, user_message):
+    """Run the CSV agent with the given file path and user message."""
+    agent = create_csv_agent(
+        ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613", openai_api_key=OPENAI_API_KEY),
+        file_path, 
+        verbose=True,
+        agent_type=AgentType.OPENAI_FUNCTIONS,
+    )
 
-st.title("Chat with CSV using Llama2 🦙🦜")
-st.markdown("<h3 style='text-align: center; color: white;'>Built by <a href='https://github.com/AIAnytime'>AI Anytime with ❤️ </a></h3>", unsafe_allow_html=True)
-
-uploaded_file = st.sidebar.file_uploader("Upload your Data", type="csv")
-
-if uploaded_file :
-   #use tempfile because CSVLoader only accepts a file_path
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
-        tmp_file.write(uploaded_file.getvalue())
-        tmp_file_path = tmp_file.name
-
-    loader = CSVLoader(file_path=tmp_file_path, encoding="utf-8", csv_args={
-                'delimiter': ','})
-    data = loader.load()
-    #st.json(data)
-    embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2',
-                                       model_kwargs={'device': 'cpu'})
-
-    db = FAISS.from_documents(data, embeddings)
-    db.save_local(DB_FAISS_PATH)
-    llm = load_llm()
-    chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
-
-    def conversational_chat(query):
-        result = chain({"question": query, "chat_history": st.session_state['history']})
-        st.session_state['history'].append((query, result["answer"]))
-        return result["answer"]
-    
-    if 'history' not in st.session_state:
-        st.session_state['history'] = []
-
-    if 'generated' not in st.session_state:
-        st.session_state['generated'] = ["Hello ! Ask me anything about " + uploaded_file.name + " 🤗"]
-
-    if 'past' not in st.session_state:
-        st.session_state['past'] = ["Hey ! 👋"]
+    try:
+        # Properly format the user's input and wrap it with the required "input" key
+        tool_input = {
+            "input": {
+                "name": "python",
+                "arguments": user_message
+            }
+        }
         
-    #container for the chat history
-    response_container = st.container()
-    #container for the user's text input
-    container = st.container()
+        response = agent.run(tool_input)
+        return response
+    except Exception as e:
+        st.write(f"Error: {e}")
+        return None
+    
 
-    with container:
-        with st.form(key='my_form', clear_on_submit=True):
+def display_content_from_json(json_response):
+    """
+    Display content to Streamlit based on the structure of the provided JSON.
+    """
+    
+    # Check if the response has plain text.
+    if "answer" in json_response:
+        st.write(json_response["answer"])
+
+    # Check if the response has a bar chart.
+    if "bar" in json_response:
+        data = json_response["bar"]
+        df = pd.DataFrame(data)
+        df.set_index("columns", inplace=True)
+        st.bar_chart(df)
+
+    # Check if the response has a table.
+    if "table" in json_response:
+        data = json_response["table"]
+        df = pd.DataFrame(data["data"], columns=data["columns"])
+        st.table(df)
+        
+
+def extract_code_from_response(response):
+    """Extracts Python code from a string response."""
+    # Use a regex pattern to match content between triple backticks
+    code_pattern = r"```python(.*?)```"
+    match = re.search(code_pattern, response, re.DOTALL)
+    
+    if match:
+        # Extract the matched code and strip any leading/trailing whitespaces
+        return match.group(1).strip()
+    return None
+
+
+def csv_analyzer_app():
+    """Main Streamlit application for CSV analysis."""
+
+    st.title('CSV Assistant')
+    st.write('Please upload your CSV file and enter your query below:')
+    
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    
+    if uploaded_file is not None:
+        file_details = {"FileName": uploaded_file.name, "FileType": uploaded_file.type, "FileSize": uploaded_file.size}
+        st.write(file_details)
+        
+        # Save the uploaded file to disk
+        file_path = os.path.join("/tmp", uploaded_file.name)
+        with open(file_path,"wb") as f:
+            f.write(uploaded_file.getbuffer())
+        
+        df = pd.read_csv(file_path)
+        st.dataframe(df)
+        
+        user_input = st.text_input("Your query")
+        if st.button('Run'):
+            response = csv_agent_func(file_path, user_input)
             
-            user_input = st.text_input("Query:", placeholder="Talk to your csv data here (:", key='input')
-            submit_button = st.form_submit_button(label='Send')
+            # Extracting code from the response
+            code_to_execute = extract_code_from_response(response)
             
-        if submit_button and user_input:
-            output = conversational_chat(user_input)
-            
-            st.session_state['past'].append(user_input)
-            st.session_state['generated'].append(output)
+            if code_to_execute:
+                try:
+                    # Making df available for execution in the context
+                    exec(code_to_execute, globals(), {"df": df, "plt": plt})
+                    fig = plt.gcf()  # Get current figure
+                    st.pyplot(fig)  # Display using Streamlit
+                except Exception as e:
+                    st.write(f"Error executing code: {e}")
+            else:
+                st.write(response)
 
-    if st.session_state['generated']:
-        with response_container:
-            for i in range(len(st.session_state['generated'])):
-                message(st.session_state["past"][i], is_user=True, key=str(i) + '_user', avatar_style="big-smile")
-                message(st.session_state["generated"][i], key=str(i), avatar_style="thumbs")
-
-
-
+    st.divider()
+    
+if __name__ == "__main__":
+    csv_analyzer_app()
     
