@@ -43,7 +43,7 @@ if uploaded_file :
 
     db = FAISS.from_documents(data, embeddings)
     db.save_local(DB_FAISS_PATH)
-    #llm = load_llm()
+    llm = load_llm()
     chain = ConversationalRetrievalChain.from_llm(llm=llm, retriever=db.as_retriever())
 
     def conversational_chat(query):
