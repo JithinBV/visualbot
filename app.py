@@ -21,8 +21,7 @@ def load_llm():
         model = "meta/llama-2-7b:527827021d8756c7ab79fde0abbfaac885c37a3ed5fe23c7465093f0878d55ef", 
         callbacks=[StreamingStdOutCallbackHandler()],
         input = {"temperature": 0.01, "max_length" :4096,"top_p":1})
-
-    return llm
+  return llm
 
 st.title("Chat with CSV using Llama2 🦙🦜")
 st.markdown("<h3 style='text-align: center; color: white;'>Built by <a href='https://github.com/AIAnytime'>AI Anytime with ❤️ </a></h3>", unsafe_allow_html=True)
