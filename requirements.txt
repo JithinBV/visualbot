@@ -11,3 +11,4 @@ faiss_cpu
 python-dotenv
 matplotlib
 pandas
+openai
