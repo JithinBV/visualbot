@@ -10,15 +10,14 @@ from langchain.llms import AzureOpenAI
 from langchain.chains import ConversationalRetrievalChain
 
 DB_FAISS_PATH = 'vectorstore/db_faiss'
-API_KEY = "f769445c82844edda56668cb92806c21"
+load dotenv()
 #Loading the model
 def load_llm():
-    llm = AzureOpenAI(
-    api_token=API_KEY,
-    api_base="https://aoiaipsi.openai.azure.com",
-    api_version="2023-07-01-preview",
-    deployment_name="gpt-35-turbo-0613"
-)
+  llm = Replicate(
+        streaming = True,
+        model = "meta/llama-2-7b:527827021d8756c7ab79fde0abbfaac885c37a3ed5fe23c7465093f0878d55ef", 
+        callbacks=[StreamingStdOutCallbackHandler()],
+        input = {"temperature": 0.01, "max_length" :4096,"top_p":1})
 
     return llm
 
