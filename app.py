@@ -9,13 +9,16 @@ from langchain.agents import create_csv_agent
 from langchain.chat_models import ChatOpenAI
 from langchain.agents.agent_types import AgentType
 OPENAI_API_KEY="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"
-openai.api_key = OPENAI_API_KEY
+from dotenv import load_dotenv
 
+load_dotenv()
 
 def csv_agent_func(file_path, user_message):
+    load_dotenv()
+
     """Run the CSV agent with the given file path and user message."""
     agent = create_csv_agent(
-        ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613", openai_api_key=OPENAI_API_KEY),
+        ChatOpenAI(temperature=0, model="gpt-3.5-turbo-0613"),
         file_path, 
         verbose=True,
         agent_type=AgentType.OPENAI_FUNCTIONS,
@@ -37,6 +40,8 @@ def csv_agent_func(file_path, user_message):
         return None
 
 def display_content_from_json(json_response):
+    load_dotenv()
+
     """
     Display content to Streamlit based on the structure of the provided JSON.
     """
@@ -60,6 +65,8 @@ def display_content_from_json(json_response):
         
 
 def extract_code_from_response(response):
+    load_dotenv()
+
     """Extracts Python code from a string response."""
     # Use a regex pattern to match content between triple backticks
     code_pattern = r"```python(.*?)```"
@@ -72,6 +79,8 @@ def extract_code_from_response(response):
 
 
 def csv_analyzer_app():
+    load_dotenv()
+
     """Main Streamlit application for CSV analysis."""
 
     st.title('CSV Assistant')
