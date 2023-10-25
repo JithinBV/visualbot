@@ -26,10 +26,7 @@ def main():
     user_csv = st.file_uploader("upload your csv file", type = 'csv', accept_multiple_files=True)
     
     if user_csv is not None:
-        data = pd.read_csv(user_csv)
-        st.dataframe(data.head(10))
-        
-        
+         
         
         
         user_question= st.text_input("ASK YOUR QUESTION:")
