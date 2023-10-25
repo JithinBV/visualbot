@@ -23,7 +23,7 @@ def main():
     st.set_page_config(page_title="Ask your CSV")
     st.header("Ask your CSV(agent)")
     
-    user_csv = st.file_uploader("upload your csv file", type = 'csv', #accept_multiple_files=True)
+    user_csv = st.file_uploader("upload your csv file", type = 'csv')
     
     if user_csv is not None:
         data = pd.read_csv(user_csv)
