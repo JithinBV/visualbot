@@ -1,7 +1,6 @@
 import streamlit as  st
 from langchain.agents import create_csv_agent
 from langchain.llms import AzureOpenAI
-import pandas as pd
 
 import os
 from dotenv import load_dotenv
@@ -23,11 +22,9 @@ def main():
     st.set_page_config(page_title="Ask your CSV")
     st.header("Ask your CSV(agent)")
     
-    user_csv = st.file_uploader("upload your csv file", type = 'csv')
+    user_csv = st.file_uploader("upload your csv file", type = 'csv', accept_multiple_files=True)
     
     if user_csv is not None:
-        data = pd.read_csv(user_csv)
-        st.dataframe(data.head(10))
         
         
         
