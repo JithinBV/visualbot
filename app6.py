@@ -68,7 +68,7 @@ def ask_agent(agent, query):
     response = agent.run(prompt)
     print(response)
 
-    return str(response)
+    return response
 
 def decode_response(response: str) -> dict:
     """This function converts the string response from the model to a dictionary object.
