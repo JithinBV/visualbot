@@ -15,25 +15,19 @@ os.environ["OPENAI_API_TYPE"] = "azure"
 AZURE_OPENAI_NAME = 'gpt-35-turbo-0301'
 
 
-
-
-# Function to generate response to user question
-
-
-st.header("CSV Reader ")
-# File uploader function
-user_csv = st.file_uploader("Upload your CSV file", type="csv")
-
 def get_text():
-   input_text = st.text_input("Enter your question")
+   input_text = st.sidebar.text_input("Enter your question")
    return input_text
 
+# Function to generate response to user question
 def get_response(query):
    with st.spinner(text="In progress"):
        response = agent.run(query)
    return response
 
-
+st.header("CSV Reader ")
+# File uploader function
+user_csv = st.file_uploader("Upload your CSV file", type="csv")
 if user_csv is not None:
    # Get the user input
    user_input = get_text()
@@ -57,4 +51,6 @@ if user_csv is not None:
            message(st.session_state['past'][i], is_user=True, key=str(i)+'_user')
            message(st.session_state['generated'][i], key=str(i))
            
-
+def get_text():
+   input_text = st.text_input("Enter your question")
+   return input_text
