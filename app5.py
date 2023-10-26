@@ -77,14 +77,14 @@ def get_response(query):
    
        #response = agent.run(query)
    #return response
-if df is not None:
+if user_csv is not None:
     
    # Get the user input
    user_input = get_text()
    # Initialize the OpenAI model
    llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
    # Initialize the agent
-   agent = create_csv_agent(llm,df, verbose=True)
+   agent = create_csv_agent(llm,user_csv, verbose=True)
    # Initialize the session state
    if 'generated' not in st.session_state:
        st.session_state['generated'] = ["Yes, you can!"]
