@@ -1,7 +1,7 @@
 import streamlit as st
 import os
 from streamlit_chat import message
-from langchain.agents import create_csv_agent
+from langchain.agents import create_pandas_dataframe_agent
 from langchain.llms import AzureOpenAI
 
 os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = 'https://aoiaipsi.openai.azure.com/'
@@ -86,7 +86,7 @@ if user_csv is not None:
    # Initialize the OpenAI model
    llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
    # Initialize the agent
-   agent = create_csv_agent(llm, user_csv, verbose=True)
+   agent = create_pandas_dataframe_agent(llm, user_csv, verbose=True)
    # Initialize the session state
    if 'generated' not in st.session_state:
        st.session_state['generated'] = ["Yes, you can!"]
