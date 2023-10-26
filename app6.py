@@ -66,6 +66,8 @@ def ask_agent(agent, query):
         + query
     )
     response = agent.run(prompt)
+    print(response)
+
     return str(response)
 
 def decode_response(response: str) -> dict:
