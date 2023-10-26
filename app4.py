@@ -27,7 +27,7 @@ def get_response(query):
 
 st.header("CSV Reader ")
 # File uploader function
-user_csv = st.file_uploader("Upload your CSV file", type="csv")
+user_csv = st.file_uploader("Upload your CSV file", type="csv",accept_multiple_files=True)
 if user_csv is not None:
    # Get the user input
    user_input = get_text()
