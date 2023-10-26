@@ -1,3 +1,4 @@
+pandasai
 streamlit_chat
 streamlit
 pypdf
