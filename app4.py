@@ -23,6 +23,17 @@ AZURE_OPENAI_NAME = 'gpt-35-turbo-0301'
 st.header("CSV Reader ")
 # File uploader function
 user_csv = st.file_uploader("Upload your CSV file", type="csv")
+
+def get_text():
+   input_text = st.text_input("Enter your question")
+   return input_text
+
+def get_response(query):
+   with st.spinner(text="In progress"):
+       response = agent.run(query)
+   return response
+
+
 if user_csv is not None:
    # Get the user input
    user_input = get_text()
@@ -46,11 +57,4 @@ if user_csv is not None:
            message(st.session_state['past'][i], is_user=True, key=str(i)+'_user')
            message(st.session_state['generated'][i], key=str(i))
            
-def get_text():
-   input_text = st.text_input("Enter your question")
-   return input_text
 
-def get_response(query):
-   with st.spinner(text="In progress"):
-       response = agent.run(query)
-   return response
