@@ -40,7 +40,6 @@ def main():
             
             st.spinner("Generating response.....")
             st.write(response)
-            st.bar_chart(response)
 
 
 if __name__ == "__main__":
