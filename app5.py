@@ -25,6 +25,16 @@ def get_text():
 # Function to generate response to user question
 def get_response(query):
    with st.spinner(text="In progress"):
+       """
+    Query an agent and return the response as a string.
+
+    Args:
+        agent: The agent to query.
+        query: The query to ask the agent.
+
+    Returns:
+        The response from the agent as a string.
+    """
        prompt = (
         """
             For the following query, if it requires drawing a table, reply as follows:
