@@ -144,4 +144,3 @@ if st.button("Submit Query", type="primary"):
  
     # Query the agent.
     response = ask_agent(agent=agent, query=query)
-    print(response)
