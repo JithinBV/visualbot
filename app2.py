@@ -1,6 +1,7 @@
 import streamlit as  st
-from langchain.agents import create_csv_agent
+from langchain.agents import create_pandas_dataframe_agent
 from langchain.llms import AzureOpenAI
+from pandasai import pd
 
 import os
 from dotenv import load_dotenv
@@ -22,9 +23,17 @@ def main():
     st.set_page_config(page_title="Ask your CSV")
     st.header("Ask your CSV(agent)")
     
-    user_csv = st.file_uploader("upload your csv file", type = 'csv')
+    user_csv = st.file_uploader("upload your csv file", type = 'csv', accept_multiple_files=True)
+    for f in user_csv:
+        st.write(f)
+        data_list = []
+        for f in user_csv:
+            data = pd.read_csv(f)
+            data_list.append(data)
+            df = pd.concat(data_list)
     
     if user_csv is not None:
+        
        
         
     
@@ -33,13 +42,14 @@ def main():
         
         llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
 
-        agent = create_csv_agent(llm, user_csv,verbose=True)
+        agent = create_pandas_dataframe_agent(llm, user_csv,verbose=True)
         
         if user_question is not None and user_question != "":
             response = agent.run(user_question)
             
             st.spinner("Generating response.....")
             st.write(response)
+            
 
 
 if __name__ == "__main__":
