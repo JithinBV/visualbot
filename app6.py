@@ -66,9 +66,8 @@ def ask_agent(agent, query):
         + query
     )
     response = agent.run(prompt)
-    print(response)
-
-    return response
+    
+    return str(response)
 
 def decode_response(response: str) -> dict:
     """This function converts the string response from the model to a dictionary object.
@@ -95,6 +94,7 @@ def write_answer(response_dict: dict):
     # Check if the response is an answer.
     if "answer" in response_dict:
         st.write(response_dict["answer"])
+        
  
     # Check if the response is a bar chart.
     # Check if the response is a bar chart.
@@ -144,3 +144,4 @@ if st.button("Submit Query", type="primary"):
  
     # Query the agent.
     response = ask_agent(agent=agent, query=query)
+    print(response)
