@@ -1,7 +1,7 @@
 import streamlit as  st
 from langchain.agents import create_pandas_dataframe_agent
 from langchain.llms import AzureOpenAI
-from pandas import pd
+import pandas as pd
 
 import os
 from dotenv import load_dotenv
