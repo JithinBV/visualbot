@@ -1,7 +1,8 @@
 import streamlit as st
+import pandas as pd
 import os
 from streamlit_chat import message
-from langchain.agents import create_pandas_dataframe_agent
+from langchain.agents import create_csv_agent
 from langchain.llms import AzureOpenAI
 
 os.environ["OPENAI_API_BASE"] = os.environ["AZURE_OPENAI_ENDPOINT"] = 'https://aoiaipsi.openai.azure.com/'
@@ -16,7 +17,14 @@ AZURE_OPENAI_NAME = 'gpt-35-turbo-0301'
 
 st.header("CSV Reader ")
 # File uploader function
-user_csv = st.file_uploader("Upload your CSV file", type="csv")
+user_csv = st.file_uploader("upload your csv file", type = 'csv', accept_multiple_files=True)
+for f in user_csv:
+        st.write(f)
+        data_list = []
+for f in user_csv:
+    data = pd.read_csv(f)
+    data_list.append(data)
+    df = pd.concat(data_list)
 
 def get_text():
    input_text = st.text_input("Enter your question")
@@ -25,16 +33,6 @@ def get_text():
 # Function to generate response to user question
 def get_response(query):
    with st.spinner(text="In progress"):
-       """
-    Query an agent and return the response as a string.
-
-    Args:
-        agent: The agent to query.
-        query: The query to ask the agent.
-
-    Returns:
-        The response from the agent as a string.
-    """
        prompt = (
         """
             For the following query, if it requires drawing a table, reply as follows:
@@ -79,14 +77,14 @@ def get_response(query):
    
        #response = agent.run(query)
    #return response
-if user_csv is not None:
+if df is not None:
     
    # Get the user input
    user_input = get_text()
    # Initialize the OpenAI model
    llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
    # Initialize the agent
-   agent = create_pandas_dataframe_agent(llm, user_csv, verbose=True)
+   agent = create_csv_agent(llm,df, verbose=True)
    # Initialize the session state
    if 'generated' not in st.session_state:
        st.session_state['generated'] = ["Yes, you can!"]
