@@ -2,7 +2,7 @@
 import os
 import streamlit as  st
 import pandas as pd
-from pandasai.llm import AzureOpenAI
+from langchain.llms import AzureOpenAI
 from pandasai import PandasAI
 from dotenv import load_dotenv
 from langchain.agents import create_csv_agent
