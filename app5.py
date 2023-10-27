@@ -84,7 +84,7 @@ if user_csv is not None:
    # Initialize the OpenAI model
    llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
    # Initialize the agent
-   agent = create_csv_agent(llm,user_csv, verbose=True)
+   agent = create_csv_agent(llm,df, verbose=True)
    # Initialize the session state
    if 'generated' not in st.session_state:
        st.session_state['generated'] = ["Yes, you can!"]
