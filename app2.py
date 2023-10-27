@@ -30,10 +30,10 @@ def main():
     for f in user_csv:
         st.write(f)
         data_list = []
-        for f in user_csv:
-            data = pd.read_csv(f)
-            data_list.append(data)
-            df = pd.concat(data_list)
+    for f in user_csv:
+        data = pd.read_csv(f)
+        data_list.append(data)
+        df = pd.concat(data_list)
     
     if df is not None:
         
