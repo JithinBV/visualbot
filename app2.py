@@ -1,4 +1,5 @@
 import streamlit as  st
+from langchain.agents import initialize_agent, Tool
 from langchain.agents import create_pandas_dataframe_agent
 from langchain.llms import AzureOpenAI
 import pandas as pd
@@ -16,6 +17,8 @@ os.environ["OPENAI_API_VERSION"] = os.environ["AZURE_OPENAI_API_VERSION"] = "202
 os.environ["OPENAI_API_TYPE"] = "azure"
 
 AZURE_OPENAI_NAME = 'gpt-35-turbo-0301'
+
+
 
 
 def main():
@@ -38,11 +41,19 @@ def main():
         
     
         user_question= st.text_input("ASK YOUR QUESTION:")
+        tools = [
+            Tool(
+                name="Jester",
+                func=lambda x: "foo",
+                description="useful for answer the question",
+                )
+            ]
         
         
         llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
-
-        agent = create_pandas_dataframe_agent(llm, df,verbose=True)
+        agent = initialize_agent(
+            tools, llm, agent=create_pandas_dataframe_agent.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+            )
         
         if user_question is not None and user_question != "":
             response = agent.run(user_question)
