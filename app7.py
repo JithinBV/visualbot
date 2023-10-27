@@ -50,8 +50,6 @@ def main():
         For example:
            {"answer": "The Product with the highest Orders is '15143Exfo'"}
  
-        5. If the answer is not known or available, respond with:
-           {"answer": "I do not know."}
  
         Return all output as a string. Remember to encase all strings in the "columns" list and data list in double quotes.
         For example: {"columns": ["Products", "Orders"], "data": [["51993Masc", 191], ["49631Foun", 152]]}
