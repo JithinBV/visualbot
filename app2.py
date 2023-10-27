@@ -1,5 +1,4 @@
 import streamlit as  st
-from langchain.agents import initialize_agent, Tool
 from langchain.agents import create_pandas_dataframe_agent
 from langchain.llms import AzureOpenAI
 import pandas as pd
@@ -33,7 +32,7 @@ def main():
         for f in user_csv:
              data = pd.read_csv(f)
              data_list.append(data)
-             df = pd.concat(data_list)
+        df = pd.concat(data_list)
     
     if df is not None:
         
