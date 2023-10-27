@@ -18,7 +18,13 @@ os.environ["OPENAI_API_TYPE"] = "azure"
 
 AZURE_OPENAI_NAME = 'gpt-35-turbo-0301'
 
-
+tools = [
+            Tool(
+                name="Jester",
+                func=lambda x: "foo",
+                description="useful for answer the question",
+                )
+            ]
 
 
 def main():
@@ -36,18 +42,8 @@ def main():
         df = pd.concat(data_list)
     
     if df is not None:
-        
-       
-        
-    
         user_question= st.text_input("ASK YOUR QUESTION:")
-        tools = [
-            Tool(
-                name="Jester",
-                func=lambda x: "foo",
-                description="useful for answer the question",
-                )
-            ]
+       
         
         
         llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
