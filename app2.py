@@ -18,13 +18,7 @@ os.environ["OPENAI_API_TYPE"] = "azure"
 
 AZURE_OPENAI_NAME = 'gpt-35-turbo-0301'
 
-tools = [
-            Tool(
-                name="Jester",
-                func=lambda x: "foo",
-                description="useful for answer the question",
-                )
-            ]
+
 
 
 def main():
@@ -42,14 +36,17 @@ def main():
             df = pd.concat(data_list)
     
     if df is not None:
-        user_question= st.text_input("ASK YOUR QUESTION:")
+        
        
+        
+    
+        user_question= st.text_input("ASK YOUR QUESTION:")
+        
         
         
         llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
-        agent = initialize_agent(
-            tools, llm, agent=create_pandas_dataframe_agent.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
-            )
+
+        agent = create_pandas_dataframe_agent(llm, df,verbose=True)
         
         if user_question is not None and user_question != "":
             response = agent.run(user_question)
