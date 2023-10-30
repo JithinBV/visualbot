@@ -54,7 +54,7 @@ def main():
  
         llm = AzureOpenAI(deployment_name=AZURE_OPENAI_NAME, temperature=0)
  
-        agent = create_pandas_dataframe_agent(llm, df, verbose=True)
+        agent = create_pandas_dataframe_agent(llm, df, verbose=True,handle_parsing_errors=True)
  
         if user_question is not None and user_question != "":
             response = agent.run(user_question)
