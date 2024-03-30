@@ -1,5 +1,5 @@
 import streamlit as  st
-from langchain.agents import create_pandas_dataframe_agent
+from langchain_experimental.agents.create_pandas_dataframe_agent import create_pandas_dataframe_agent
 from langchain.llms import AzureOpenAI
 import pandas as pd
 
