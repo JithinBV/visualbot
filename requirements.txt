@@ -15,3 +15,4 @@ pandas
 openai
 tabulate
 pandasai
+langchain_experimental.agents.create_pandas_dataframe_agent
